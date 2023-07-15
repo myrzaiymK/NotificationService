@@ -1,22 +1,6 @@
 from rest_framework import serializers
-from .models import Mailing
+from .models import Mailing, Client
 
-# class MailingSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Mailing
-#         fields = ['id', 'start_time', 'end_time', 'message_text', 'client_filter']
-#
-# class ClientSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Client
-#         fields = ['id', 'phone_number', 'operator_code', 'tag', 'timezone']
-
-class MailingSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    start_time = serializers.DateTimeField()
-    end_time = serializers.DateTimeField()
-    message_text = serializers.CharField(max_length=255)
-    client_filter = serializers.ListField(child=serializers.CharField(max_length=255))
 
 class ClientSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -24,3 +8,31 @@ class ClientSerializer(serializers.Serializer):
     operator_code = serializers.CharField(max_length=10)
     tag = serializers.CharField(max_length=255)
     timezone = serializers.CharField(max_length=50)
+
+    def create(self, validated_data):
+        return Client.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.phone_number = validated_data.get('phone_number', instance.phone_number)
+        instance.operator_code = validated_data.get('operator_code', instance.operator_code)
+        instance.tag = validated_data.get('tag', instance.tag)
+        instance.timezone = validated_data.get('timezone', instance.timezone)
+        instance.save()
+        return instance
+
+
+
+class MailingSerializer(serializers.ModelSerializer):
+    client_filter = ClientSerializer(many=True)
+
+    class Meta:
+        model = Mailing
+        fields = '__all__'
+
+
+class MessageSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    created_at = serializers.DateTimeField()
+    status = serializers.CharField(max_length=255)
+    mail_id = serializers.IntegerField()
+    client_id = serializers.IntegerField()
