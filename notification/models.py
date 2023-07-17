@@ -29,7 +29,7 @@ class Message(models.Model):
     id = models.AutoField(primary_key=True)
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=50)
-    dispatch = models.ForeignKey('Mailing', on_delete=models.CASCADE)
+    mail = models.ForeignKey('Mailing', on_delete=models.CASCADE)
     client = models.ForeignKey('Client', on_delete=models.CASCADE)
 
     def __str__(self):
